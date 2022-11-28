@@ -9,7 +9,7 @@ bot = telebot.TeleBot(telegram_bot_key)
 WALLET = '0x114Fe577BC999D7B854959859BfeA5CA0e0269D4'
 DEBT_REPAYER = '0x9eb6BF2E582279cfC1988d3F2043Ff4DF18fa6A0'
 SLEEP_SECONDS = 7
-LOG_ITERATIONS = 100
+LOG_ITERATIONS = 500
 
 TOKENS = {
     '0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599': {
@@ -65,6 +65,7 @@ def main():
                 print(f'Current contract {symbol} balance: {balance/10**decimals}',flush=True)
                 print(f'{"✅" if should_claim else "🟥"} {symbol} threshold: {TOKENS[address]["threshold"]/10**decimals}',flush=True)
             if should_claim:
+                print(f'Claiming!\nCurrent contract {symbol} balance: {balance/10**decimals}',flush=True)
                 an_balance = antoken.balanceOf(WALLET)
                 min = repayer.amountOut(antoken.address, address, an_balance)[0] * .99
                 try:
