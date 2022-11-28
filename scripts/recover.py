@@ -48,8 +48,8 @@ def main():
             decimals = TOKENS[address]["decimals"]
             symbol = TOKENS[address]["symbol"]
             should_claim = balance > TOKENS[address]["threshold"]
-            print(f'\nCurrent contract {symbol} balance: {balance/10**decimals}')
-            print(f'{"✅" if should_claim else "🟥"} {symbol} threshold: {TOKENS[address]["threshold"]/10**decimals}')
+            print(f'\nCurrent contract {symbol} balance: {balance/10**decimals}',flush=True)
+            print(f'{"✅" if should_claim else "🟥"} {symbol} threshold: {TOKENS[address]["threshold"]/10**decimals}',flush=True)
             if should_claim:
                 an_balance = antoken.balanceOf(WALLET)
                 min = repayer.amountOut(antoken.address, address, an_balance)[0] * .99
@@ -60,8 +60,8 @@ def main():
                     m += f'\n\n🔗 [View on Etherscan](https://etherscan.io/tx/{tx.txid})'
                     send_alert(m)
                 except Exception as e:
-                    print(e)
-                    m = f'Unable to send transaction for {symbol}.\n\n{e}\n\nCurrent balance available: {balance/10**decimals}'
+                    print(e,flush=True)
+                    m = f'Unable to send transaction for {symbol}.\n\nCurrent balance available: {balance/10**decimals}'
                     send_alert(m)
         time.sleep(7)
 
