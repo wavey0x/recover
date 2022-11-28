@@ -46,15 +46,15 @@ def main():
     repayer = Contract(DEBT_REPAYER, owner=wallet)
     count = 0
     while True:
-        count += 1
         if count % LOG_ITERATIONS == 0:
             print_stuff = True
             now = datetime.now()
             dt_string = now.strftime("%d/%m/%Y %H:%M:%S")
-            print(f'--- {dt_string} ---')
-            print(f'Logging every {SLEEP_SECONDS * LOG_ITERATIONS / 60} minutes')
+            print(f'--- {dt_string} ---',flush=True)
+            print(f'Logging every {SLEEP_SECONDS * LOG_ITERATIONS / 60} minutes',flush=True)
         else:
             print_stuff = False
+        count += 1
         for address in TOKENS:
             balance = Contract(address).balanceOf(repayer)
             antoken = Contract(TOKENS[address]['antoken'])
