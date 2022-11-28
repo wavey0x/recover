@@ -41,27 +41,29 @@ def main():
     if is_dev:
         setup()
     repayer = Contract(DEBT_REPAYER, owner=wallet)
-    for address in TOKENS:
-        balance = Contract(address).balanceOf(repayer)
-        antoken = Contract(TOKENS[address]['antoken'])
-        decimals = TOKENS[address]["decimals"]
-        symbol = TOKENS[address]["symbol"]
-        should_claim = balance > TOKENS[address]["threshold"]
-        print(f'\nCurrent contract {symbol} balance: {balance/10**decimals}')
-        print(f'{"✅" if should_claim else "🟥"} {symbol} threshold: {TOKENS[address]["threshold"]/10**decimals}')
-        if should_claim:
-            an_balance = antoken.balanceOf(WALLET)
-            min = repayer.amountOut(antoken.address, address, an_balance)[0] * .99
-            try:
-                tx = repayer.sellDebt(antoken.address, an_balance, min, tx_params)
-                repayment = tx.events['debtRepayment']
-                m = f'Received: {repayment["receiveAmount"]/10**decimals} {TOKENS[repayment["underlying"]]["symbol"]}\nPaid: {repayment["paidAmount"]/1e8} {antoken.symbol()}'
-                m += f'\n\n🔗 [View on Etherscan](https://etherscan.io/tx/{tx.txid})'
-                send_alert(m)
-            except Exception as e:
-                print(e)
-                m = f'Unable to send transaction for {symbol}.\n\n{e}\n\nCurrent balance available: {balance/10**decimals}'
-                send_alert(m)
+    while True:
+        for address in TOKENS:
+            balance = Contract(address).balanceOf(repayer)
+            antoken = Contract(TOKENS[address]['antoken'])
+            decimals = TOKENS[address]["decimals"]
+            symbol = TOKENS[address]["symbol"]
+            should_claim = balance > TOKENS[address]["threshold"]
+            print(f'\nCurrent contract {symbol} balance: {balance/10**decimals}')
+            print(f'{"✅" if should_claim else "🟥"} {symbol} threshold: {TOKENS[address]["threshold"]/10**decimals}')
+            if should_claim:
+                an_balance = antoken.balanceOf(WALLET)
+                min = repayer.amountOut(antoken.address, address, an_balance)[0] * .99
+                try:
+                    tx = repayer.sellDebt(antoken.address, an_balance, min, tx_params)
+                    repayment = tx.events['debtRepayment']
+                    m = f'Received: {repayment["receiveAmount"]/10**decimals} {TOKENS[repayment["underlying"]]["symbol"]}\nPaid: {repayment["paidAmount"]/1e8} {antoken.symbol()}'
+                    m += f'\n\n🔗 [View on Etherscan](https://etherscan.io/tx/{tx.txid})'
+                    send_alert(m)
+                except Exception as e:
+                    print(e)
+                    m = f'Unable to send transaction for {symbol}.\n\n{e}\n\nCurrent balance available: {balance/10**decimals}'
+                    send_alert(m)
+        time.sleep(7)
 
 def send_alert(m):
     bot.send_message('-789090497', m, parse_mode="markdown", disable_web_page_preview = True)
