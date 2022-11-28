@@ -60,16 +60,16 @@ def main():
             antoken = Contract(TOKENS[address]['antoken'])
             decimals = TOKENS[address]["decimals"]
             symbol = TOKENS[address]["symbol"]
-            should_claim = balance > TOKENS[address]["threshold"]
+            my_antoken_balance = antoken.balanceOf(WALLET)
+            should_claim = balance > TOKENS[address]["threshold"] and my_antoken_balance > 0
             if print_stuff:
                 print(f'Current contract {symbol} balance: {balance/10**decimals}',flush=True)
                 print(f'{"✅" if should_claim else "🟥"} {symbol} threshold: {TOKENS[address]["threshold"]/10**decimals}',flush=True)
             if should_claim:
                 print(f'Claiming!\nCurrent contract {symbol} balance: {balance/10**decimals}',flush=True)
-                an_balance = antoken.balanceOf(WALLET)
-                min = repayer.amountOut(antoken.address, address, an_balance)[0] * .99
+                min = repayer.amountOut(antoken.address, address, my_antoken_balance)[0] * .99
                 try:
-                    tx = repayer.sellDebt(antoken.address, an_balance, min, tx_params)
+                    tx = repayer.sellDebt(antoken.address, my_antoken_balance, min, tx_params)
                     repayment = tx.events['debtRepayment']
                     m = f'Received: {repayment["receiveAmount"]/10**decimals} {TOKENS[repayment["underlying"]]["symbol"]}\nPaid: {repayment["paidAmount"]/1e8} {antoken.symbol()}'
                     m += f'\n\n🔗 [View on Etherscan](https://etherscan.io/tx/{tx.txid})'
@@ -88,3 +88,6 @@ def setup():
     whale = accounts.at('0x218B95BE3ed99141b0144Dba6cE88807c4AD7C09', force=True)
     wbtc = Contract('0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599',owner=whale)
     wbtc.transfer(DEBT_REPAYER, 1e8)
+    whale = accounts.at('0xF977814e90dA44bFA03b6295A0616a897441aceC', force=True)
+    yfi = Contract('0x0bc529c00C6401aEF6D220BE8C6Ea1667F6Ad93e', owner=whale)
+    yfi.transfer(DEBT_REPAYER, 1e18)
